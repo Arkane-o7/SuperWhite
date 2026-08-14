@@ -36,6 +36,26 @@ function videoOutputName(inputName: string, stops: number) {
   return `${stem || 'video'}-superwhite-${String(stops).replace('.', '-')}stops.mp4`
 }
 
+function makeHeroTextPixels(): PixelBuffer {
+  const canvas = document.createElement('canvas')
+  canvas.width = 2000
+  canvas.height = 420
+  const context = canvas.getContext('2d', { willReadFrequently: true })
+  if (!context) throw new Error('This browser cannot create the HDR headline.')
+
+  context.fillStyle = '#080808'
+  context.fillRect(0, 0, canvas.width, canvas.height)
+  context.fillStyle = '#ffffff'
+  context.font = '900 270px Arial Black, Arial, sans-serif'
+  context.textAlign = 'center'
+  context.textBaseline = 'middle'
+  context.letterSpacing = '-13px'
+  context.fillText('SUPERWHITE', canvas.width / 2, canvas.height / 2 - 8)
+
+  const image = context.getImageData(0, 0, canvas.width, canvas.height)
+  return { data: image.data, width: image.width, height: image.height }
+}
+
 function App() {
   const [source, setSource] = useState<PixelBuffer>(() => makeDemoPixels())
   const [mediaKind, setMediaKind] = useState<MediaKind>('image')
@@ -47,6 +67,7 @@ function App() {
   const [converted, setConverted] = useState<ConvertedPixels | null>(null)
   const [outputBlob, setOutputBlob] = useState<Blob | null>(null)
   const [outputUrl, setOutputUrl] = useState('')
+  const [heroHdrUrl, setHeroHdrUrl] = useState('')
   const [conversionState, setConversionState] = useState<ConversionState>('working')
   const [message, setMessage] = useState('Preparing the HDR preview…')
   const [dragging, setDragging] = useState(false)
@@ -55,6 +76,15 @@ function App() {
   const fileInput = useRef<HTMLInputElement>(null)
 
   const imageSourceUrl = useMemo(() => pixelsToSdrUrl(source), [source])
+
+  useEffect(() => {
+    let cancelled = false
+    void encodeHdrJpeg(convertToHdr(makeHeroTextPixels(), stops)).then((blob) => {
+      if (!cancelled) setHeroHdrUrl(URL.createObjectURL(blob))
+    })
+    return () => { cancelled = true }
+  }, [stops])
+
   useEffect(() => {
     void fetch('/api/health', { cache: 'no-store' })
       .then((response) => response.ok ? response.json() : Promise.reject())
@@ -100,6 +130,10 @@ function App() {
   useEffect(() => () => {
     if (videoSourceUrl) URL.revokeObjectURL(videoSourceUrl)
   }, [videoSourceUrl])
+
+  useEffect(() => () => {
+    if (heroHdrUrl) URL.revokeObjectURL(heroHdrUrl)
+  }, [heroHdrUrl])
 
   async function convertVideo(file = videoFile) {
     if (!file) return
@@ -228,10 +262,15 @@ function App() {
       <main id="top">
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-copy">
-            <p className="eyebrow">An HDR image + video workshop</p>
-            <h1 id="hero-title">White,<br />with <em>headroom.</em></h1>
-            <p className="hero-intro">Turn the brightest pixels in any image or video into real HDR highlights. The frame stays the same shape. The timeline stays intact. Only the light changes.</p>
-            <a className="text-cta" href="#workbench">Convert your media <ArrowIcon /></a>
+            <p className="hero-eyebrow">HDR image + video converter</p>
+            <h1 id="hero-title">
+              <span>Make your Images</span>
+              {heroHdrUrl
+                ? <img className="hero-hdr-text" src={heroHdrUrl} alt="SUPERWHITE" />
+                : <strong>SUPERWHITE</strong>}
+            </h1>
+            <p className="hero-intro">Raise real highlight brightness without changing the frame, aspect ratio, timeline, or audio.</p>
+            <a className="text-cta" href="#workbench">Make it SuperWhite <ArrowIcon /></a>
           </div>
         </section>
 

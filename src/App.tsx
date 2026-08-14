@@ -50,17 +50,11 @@ function App() {
   const [conversionState, setConversionState] = useState<ConversionState>('working')
   const [message, setMessage] = useState('Preparing the HDR preview…')
   const [dragging, setDragging] = useState(false)
-  const [limited, setLimited] = useState(false)
   const [copied, setCopied] = useState(false)
   const [localVideoAvailable, setLocalVideoAvailable] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
 
   const imageSourceUrl = useMemo(() => pixelsToSdrUrl(source), [source])
-  const hdrCapable = useMemo(
-    () => typeof window !== 'undefined' && window.matchMedia('(dynamic-range: high)').matches,
-    [],
-  )
-
   useEffect(() => {
     void fetch('/api/health', { cache: 'no-store' })
       .then((response) => response.ok ? response.json() : Promise.reject())
@@ -238,21 +232,6 @@ function App() {
             <h1 id="hero-title">White,<br />with <em>headroom.</em></h1>
             <p className="hero-intro">Turn the brightest pixels in any image or video into real HDR highlights. The frame stays the same shape. The timeline stays intact. Only the light changes.</p>
             <a className="text-cta" href="#workbench">Convert your media <ArrowIcon /></a>
-          </div>
-          <div className="hero-instrument" aria-label="Live HDR output preview">
-            <div className="instrument-ruler" aria-hidden="true"><span>1600</span><i /><span>800</span><i /><span>400</span><i /><span>203</span></div>
-            <div className="emitter-frame">
-              {mediaKind === 'video' && (outputUrl || videoSourceUrl) ? (
-                <video className={`hdr-image ${limited ? 'is-limited' : ''}`} src={outputUrl || videoSourceUrl} muted loop autoPlay playsInline />
-              ) : outputUrl ? (
-                <img className={`hdr-image ${limited ? 'is-limited' : ''}`} src={outputUrl} alt="SuperWhite HDR preview" />
-              ) : <span className="emitter-fallback">SW</span>}
-              <span className="corner-label">PQ / 2020</span>
-            </div>
-            <div className="instrument-footer">
-              <div><span className={`status-dot ${hdrCapable ? 'is-live' : ''}`} />{hdrCapable ? 'HDR-capable display detected' : 'SDR preview mode'}</div>
-              <button className="compare-button" type="button" onPointerDown={() => setLimited(true)} onPointerUp={() => setLimited(false)} onPointerCancel={() => setLimited(false)}>Hold for SDR</button>
-            </div>
           </div>
         </section>
 

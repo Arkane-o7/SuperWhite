@@ -13,8 +13,6 @@
   <a href="https://arkane-o7.github.io/SuperWhite/">Open the website</a>
 </p>
 
-![SuperWhite media converter](docs/superwhite-preview.png)
-
 SuperWhite adds real HDR highlight brightness to media without changing its
 shape. A 1920 × 1080 video remains 1920 × 1080. Portrait footage remains
 portrait. Frame rate, duration, and audio timing are preserved.

@@ -1,179 +1,162 @@
-<div align="center">
-  <img src="public/favicon.svg" width="72" height="72" alt="SuperWhite logo">
+<p align="center">
+  <img src="public/favicon.svg" width="72" height="72" alt="SuperWhite mark">
+</p>
 
-  # SuperWhite
+<h1 align="center">SuperWhite</h1>
 
-  **White, with headroom.** Turn a square SDR logo into a Rec.2020 PQ HDR JPEG—privately, in your browser or from the command line.
+<p align="center">
+  <strong>Any shape. Still or moving.</strong><br>
+  Convert SDR images and videos into dimension-preserving Rec.2020/PQ HDR media.
+</p>
 
-  [Open the workshop](https://arkane-o7.github.io/SuperWhite/) · [How it works](#how-it-works) · [CLI](#command-line)
+<p align="center">
+  <a href="https://arkane-o7.github.io/SuperWhite/">Open the website</a>
+</p>
 
-  [![Verify](https://github.com/Arkane-o7/SuperWhite/actions/workflows/ci.yml/badge.svg)](https://github.com/Arkane-o7/SuperWhite/actions/workflows/ci.yml)
-  [![MIT License](https://img.shields.io/badge/license-MIT-11110f.svg)](LICENSE)
-</div>
+![SuperWhite media converter](docs/superwhite-preview.png)
 
-![The SuperWhite website, showing the local HDR logo workbench](docs/superwhite-preview.png)
+SuperWhite adds real HDR highlight brightness to media without changing its
+shape. A 1920 × 1080 video remains 1920 × 1080. Portrait footage remains
+portrait. Frame rate, duration, and audio timing are preserved.
 
-SuperWhite lifts only the near-white areas of a logo above HDR reference white.
-Dark pixels and midtones stay composed. On a capable display and rendering path,
-the result can emit physically more light than the ordinary white interface around
-it; on SDR displays it tone-maps into an ordinary-looking logo.
+The brightest pixels can then render above SDR reference white on a compatible
+HDR display. On SDR displays, compatible software tone-maps the result.
 
-> [!IMPORTANT]
-> The observed LinkedIn behavior is undocumented and can change. Treat this as a
-> visual experiment, keep the original SDR asset, and test the exact downloaded
-> JPEG after every platform upload.
+## What it accepts
 
-## The workshop
+- Images in any format the browser or Pillow can decode
+- Videos in any format FFmpeg can decode, including MP4, MOV, MKV, WebM, AVI,
+  MTS, and M2TS
+- Landscape, portrait, ultrawide, square, or any other source aspect ratio
 
-- **Local by construction.** The browser reads, converts, encodes, and downloads
-  the logo without sending it to a server.
-- **Real progressive JPEG encoding.** MozJPEG runs in WebAssembly through
-  `@jsquash/jpeg`; SuperWhite then inserts the Rec.2020 PQ profile into JPEG APP2
-  markers.
-- **Live strength control.** Choose +1.0 to +3.9 stops and see the target and
-  measured peak values before downloading.
-- **Honest input checks.** Non-square assets and meaningful transparency are
-  rejected instead of being silently flattened or cropped.
-- **SDR/HDR comparison.** “Hold for SDR” uses the CSS `dynamic-range-limit`
-  control in browsers that support it.
+There is no square requirement, no crop step, and no padding step.
 
-Everything needed for the static site is in the repository. There is no API,
-database, analytics script, account system, or uploaded-image storage.
+## Use the website
 
-## Quick start
+Image conversion works directly on the public static website and never sends
+the image to a server.
+
+Video conversion uses native FFmpeg. Run the same interface locally to enable
+video uploads:
 
 ```bash
 git clone https://github.com/Arkane-o7/SuperWhite.git
 cd SuperWhite
 npm install
-npm run dev
+python3 -m pip install -r requirements.txt
+brew install ffmpeg
+npm run local
 ```
 
-Build and verify the production site:
+Then open [http://127.0.0.1:4173](http://127.0.0.1:4173), drop in a video, set
+the exposure, and download the HDR10 MP4. The upload travels only from your
+browser to the FFmpeg process on the same machine.
 
-```bash
-npm test
-npm run build
-npm run preview
-```
-
-Node.js 22.12 or newer is required. The `main` branch deploys `dist/` to GitHub
-Pages through [the included workflow](.github/workflows/pages.yml).
+The public GitHub Pages build cannot execute native FFmpeg, so it shows the
+local-runner instruction when a video is selected instead of pretending it can
+produce a standards-correct HDR video in-browser.
 
 ## Command line
 
-The Python converter is useful for repeatable production work and preserves
-Display P3 input handling when the source ICC profile identifies it.
+### Image
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-python scripts/make_hdr_logo.py logo.png logo-hdr.jpg --stops 2.5
-python scripts/inspect_hdr_logo.py logo-hdr.jpg
+python scripts/make_hdr_image.py input.png output-hdr.jpg --stops 2.5
+python scripts/inspect_hdr_image.py output-hdr.jpg
 ```
 
-Expected inspection result:
+The image converter preserves the exact aspect ratio and dimensions, flattens
+transparency, converts linear light into Rec.2020,
+PQ-encodes the result, and embeds the bundled Rec.2020/PQ ICC profile.
 
-```text
-format: JPEG
-progressive: yes
-ICC description: Rec2020 Gamut with PQ Transfer
-SuperWhite delivery check: PASS
+### Video
+
+```bash
+python scripts/make_hdr_video.py input.mp4 output-hdr.mp4 --stops 2.5
 ```
 
-### Strength guide
+Useful controls:
+
+```bash
+python scripts/make_hdr_video.py input.mov output-hdr.mp4 \
+  --stops 3.0 \
+  --crf 18 \
+  --preset medium
+```
+
+The output is:
+
+- The same width, height, display aspect ratio, frame rate, and duration
+- 10-bit HEVC Main 10 in an MP4 container with the `hvc1` compatibility tag
+- Rec.2020 primaries with SMPTE ST 2084 (PQ)
+- HDR10 mastering-display and MaxCLL/MaxFALL metadata
+- Original audio timing, encoded as AAC for broad MP4 compatibility
+
+Already-HDR PQ or HLG input is rejected to avoid double conversion.
+
+## Exposure
+
+`--stops` controls the maximum highlight lift. It does not resize the media.
 
 | Stops | Approximate target | Character |
-| ---: | ---: | --- |
-| +1.0 | 406 nit | Controlled |
-| +2.0 | 812 nit | Clearly brighter |
-| +2.5 | 1,148 nit | Strong starting point |
-| +3.0 | 1,624 nit | Aggressive |
-| +3.9 | 3,032 nit | Practical ceiling; displays will limit it |
+|---:|---:|---|
+| +1.0 | 406 nit | restrained |
+| +2.0 | 812 nit | visible |
+| +2.5 | 1,148 nit | strong |
+| +3.0 | 1,624 nit | intense |
+| +3.9 | 3,027 nit | extreme |
 
-Targets use 203 nit as graphics/reference white and double luminance for every
-stop. A display never exceeds its physical peak: the OS/browser tone-maps the
-requested highlight into available HDR headroom.
+The lift uses a smooth luminance threshold, so dark and midtone areas remain
+close to their source behavior while highlights receive the HDR headroom.
 
 ## How it works
 
 ```text
-square SDR pixels
-      │
-      ├─ decode sRGB / Display P3 transfer curve
-      ├─ convert linear light to Rec.2020
-      ├─ smoothly lift only relative luminance above 0.55
-      ├─ encode absolute luminance with SMPTE ST 2084 (PQ)
-      ├─ write a 96-quality progressive JPEG
-      └─ embed the Rec.2020 PQ ICC profile
+SDR image                         SDR video + audio
+    │                                     │
+    ├─ preserve source geometry           ├─ preserve geometry and timing
+    ├─ linearize sRGB                     ├─ normalize SDR color to BT.709
+    ├─ convert to Rec.2020                 ├─ apply the SuperWhite 3D LUT
+    ├─ selectively lift highlights        ├─ encode 10-bit Rec.2020/PQ HEVC
+    ├─ PQ encode                          ├─ write HDR10 metadata
+    └─ embed PQ ICC profile               └─ retain audio timing in MP4
 ```
 
-The highlight mask uses a smoothstep from relative luminance 0.55 to 0.90. That
-keeps a black background near reference behavior and blends antialiased logo
-edges without a hard halo.
+## Development
 
-The browser build follows the same math as the Python implementation in
-[`scripts/make_hdr_logo.py`](scripts/make_hdr_logo.py). Its JPEG encoder runs
-locally, and [`injectIccProfile`](src/lib/hdr.ts) packages the profile directly
-after the JPEG start marker according to the conventional ICC APP2 chunk layout.
+```bash
+npm install
+python3 -m pip install -r requirements.txt
+npm test
+python3 -m unittest discover -s tests
+npm run build
+```
 
-## Input and delivery checklist
+`npm run dev` starts the image-only Vite development server. `npm run local`
+builds the site and starts the local FFmpeg-enabled server.
 
-1. Start with a square PNG or JPEG. 400 × 400 is a useful social-logo size.
-2. Flatten transparency onto a deliberate solid background.
-3. Keep the brightest mark small; lifting the entire square is uncomfortable.
-4. Start around +2.0 or +2.5 stops.
-5. Open the downloaded JPEG directly in an HDR-capable viewer and display.
-6. Upload that exact file. Do not re-export it through an editor or design tool.
-7. Verify the platform copy on both HDR and SDR hardware.
-
-## Browser and display behavior
-
-HDR output needs an unbroken chain:
+## Project layout
 
 ```text
-HDR file + preserved profile + HDR-aware renderer + enabled HDR display
+src/                          React interface and browser image converter
+scripts/make_hdr_image.py     dimension-preserving HDR still converter
+scripts/make_hdr_video.py     dimension-preserving HDR10 video converter
+scripts/superwhite_server.py  local upload UI + FFmpeg bridge
+public/rec2020pq.icc          bundled Rec.2020/PQ delivery profile
+tests/                        image and video conversion checks
 ```
 
-SuperWhite uses `@media (dynamic-range: high)` only as a capability hint. It
-cannot prove that HDR is active, measure the viewer's physical peak luminance, or
-predict what a social platform will do after upload.
+## Compatibility
 
-- Apple documents that HDR rendering requires both ITU-R 2100 content and an
-  EDR-capable output device, and added HDR web-image presentation controls in
-  Safari 19: [What’s new in Safari and WebKit](https://developer.apple.com/videos/play/wwdc2025/233/?time=558).
-- The CSS `dynamic-range-limit` property can constrain HDR media to reference
-  white, but remains limited across browsers:
-  [MDN reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/dynamic-range-limit).
-- The original LinkedIn-surviving conversion and ICC asset come from
-  [Adamodigi/linkedin-hdr-logo](https://github.com/Adamodigi/linkedin-hdr-logo).
+The visible effect needs the entire chain: HDR file, metadata that survives the
+destination, HDR-aware player/browser/OS, and an HDR-capable display. Platform
+image and video processing can strip or rewrite HDR metadata, and behavior can
+change without notice.
 
-## Repository map
+The still-image method and profile are adapted from
+[Adamodigi/linkedin-hdr-logo](https://github.com/Adamodigi/linkedin-hdr-logo)
+under the MIT License. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-```text
-src/
-  App.tsx               product interface and interactions
-  lib/hdr.ts            Rec.2020/PQ math + JPEG ICC packaging
-  lib/image.ts          browser file decoding and demo asset
-scripts/
-  make_hdr_logo.py      reproducible Python converter
-  inspect_hdr_logo.py   delivery-profile verifier
-public/
-  rec2020pq.icc         bundled output profile
-tests/
-  test_cli.py           end-to-end CLI checks
-.github/workflows/
-  ci.yml                TypeScript, build, and Python verification
-  pages.yml             GitHub Pages deployment
-```
+## License
 
-## Credits and license
-
-The core method and ICC profile are adapted from
-[Adamodigi/linkedin-hdr-logo](https://github.com/Adamodigi/linkedin-hdr-logo),
-licensed under MIT. Browser JPEG encoding uses jSquash/MozJPEG. Full attribution
-is in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-SuperWhite is available under the [MIT License](LICENSE).
+[MIT](LICENSE)

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
   convertToHdr,
-  hasMeaningfulTransparency,
   injectIccProfile,
   makeOutputName,
   peakNitsForStops,
@@ -33,10 +32,6 @@ describe('SuperWhite HDR conversion', () => {
     ).toThrow(/dimensions/)
   })
 
-  it('detects transparency below the delivery threshold', () => {
-    expect(hasMeaningfulTransparency(pixels([0, 0, 0, 249]))).toBe(true)
-    expect(hasMeaningfulTransparency(pixels([0, 0, 0, 250]))).toBe(false)
-  })
 })
 
 describe('JPEG profile packaging', () => {

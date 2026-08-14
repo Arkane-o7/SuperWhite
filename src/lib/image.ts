@@ -1,29 +1,66 @@
 import type { PixelBuffer } from './hdr'
 
-const MAX_DIMENSION = 4096
+export interface LoadedPixels extends PixelBuffer {
+  originalWidth: number
+  originalHeight: number
+}
 
-export async function fileToPixels(file: File): Promise<PixelBuffer> {
-  if (!['image/jpeg', 'image/png'].includes(file.type)) {
-    throw new Error('Choose a PNG or JPEG file.')
+export interface OutputSize {
+  width: number
+  height: number
+}
+
+export function calculateOutputSize(
+  sourceWidth: number,
+  sourceHeight: number,
+): OutputSize {
+  if (
+    !Number.isFinite(sourceWidth) ||
+    !Number.isFinite(sourceHeight) ||
+    sourceWidth <= 0 ||
+    sourceHeight <= 0
+  ) {
+    throw new Error('Image dimensions must be positive numbers.')
   }
 
-  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
+  return {
+    width: Math.round(sourceWidth),
+    height: Math.round(sourceHeight),
+  }
+}
+
+export async function fileToPixels(file: File): Promise<LoadedPixels> {
+  if (file.type && !file.type.startsWith('image/')) {
+    throw new Error('Choose an image file.')
+  }
+
+  let bitmap: ImageBitmap
   try {
-    if (bitmap.width !== bitmap.height) {
-      throw new Error(`This image is ${bitmap.width} × ${bitmap.height}. Choose a square logo.`)
-    }
-    if (bitmap.width > MAX_DIMENSION) {
-      throw new Error(`This image is too large. Keep each side at ${MAX_DIMENSION}px or less.`)
-    }
+    bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' })
+  } catch {
+    throw new Error('This browser could not decode that image. Try exporting it as PNG or JPEG.')
+  }
+
+  try {
+    const output = calculateOutputSize(bitmap.width, bitmap.height)
 
     const canvas = document.createElement('canvas')
-    canvas.width = bitmap.width
-    canvas.height = bitmap.height
+    canvas.width = output.width
+    canvas.height = output.height
     const context = canvas.getContext('2d', { willReadFrequently: true })
     if (!context) throw new Error('This browser cannot create an image canvas.')
+
+    context.fillStyle = '#0b0b0b'
+    context.fillRect(0, 0, output.width, output.height)
     context.drawImage(bitmap, 0, 0)
-    const imageData = context.getImageData(0, 0, bitmap.width, bitmap.height)
-    return { data: imageData.data, width: bitmap.width, height: bitmap.height }
+    const imageData = context.getImageData(0, 0, output.width, output.height)
+    return {
+      data: imageData.data,
+      width: output.width,
+      height: output.height,
+      originalWidth: bitmap.width,
+      originalHeight: bitmap.height,
+    }
   } finally {
     bitmap.close()
   }

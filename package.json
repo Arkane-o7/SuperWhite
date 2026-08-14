@@ -2,12 +2,13 @@
   "name": "superwhite",
   "private": true,
   "version": "0.1.0",
-  "description": "Make the white in a logo brighter than screen white with a private, in-browser HDR converter.",
+  "description": "Convert any SDR image or video into dimension-preserving Rec.2020/PQ HDR media.",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "local": "npm run build && python3 scripts/superwhite_server.py",
     "test": "vitest run",
     "test:watch": "vitest"
   },

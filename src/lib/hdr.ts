@@ -115,13 +115,6 @@ export function convertToHdr(input: PixelBuffer, stops: number): ConvertedPixels
   }
 }
 
-export function hasMeaningfulTransparency(input: PixelBuffer) {
-  for (let index = 3; index < input.data.length; index += 4) {
-    if (input.data[index] < 250) return true
-  }
-  return false
-}
-
 export function injectIccProfile(
   jpeg: ArrayBuffer | Uint8Array<ArrayBufferLike>,
   profile: Uint8Array<ArrayBufferLike>,
@@ -199,5 +192,5 @@ export async function encodeHdrJpeg(pixels: ConvertedPixels) {
 export function makeOutputName(inputName: string, stops: number) {
   const stem = inputName.replace(/\.[^/.]+$/, '').replace(/[^a-z0-9-_]+/gi, '-').replace(/^-|-$/g, '')
   const strength = String(stops).replace('.', '-')
-  return `${stem || 'logo'}-superwhite-${strength}stops.jpg`
+  return `${stem || 'image'}-superwhite-${strength}stops.jpg`
 }

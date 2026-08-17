@@ -221,8 +221,6 @@ function App() {
       <header className="site-header">
         <a className="wordmark" href="#top" aria-label="SuperWhite home"><span>SUPER</span><strong>WHITE</strong></a>
         <nav aria-label="Primary navigation">
-          <a className="nav-link" href="#workbench">Converter</a>
-          <a className="nav-link" href="#method">How it works</a>
           <a className="github-link" href="https://github.com/Arkane-o7/SuperWhite" target="_blank" rel="noreferrer"><GithubIcon /><span>GitHub</span></a>
           <a className="header-cta" href="#workbench">Try it now <ArrowIcon /></a>
         </nav>
@@ -300,26 +298,6 @@ function App() {
                 ? localVideoAvailable ? 'Native FFmpeg runner connected. Your video is processed only on this Mac.' : 'For video: clone this repo, install FFmpeg, and run npm run local.'
                 : 'The image converter runs entirely in this browser and keeps the original aspect ratio.'}</p>
             </aside>
-          </div>
-        </section>
-
-        <section className="method" id="method" aria-labelledby="method-title">
-          <div className="method-heading"><p className="eyebrow">What changes</p><h2 id="method-title">Not a glow.<br />More light.</h2></div>
-          <div className="method-flow" aria-label="Conversion method">
-            <article><span>01</span><h3>Keep</h3><p>Resolution, aspect ratio, frame rate, duration, and audio timing remain intact.</p></article><i aria-hidden="true">→</i>
-            <article><span>02</span><h3>Lift</h3><p>A soft threshold raises highlights without resizing or cropping the frame.</p></article><i aria-hidden="true">→</i>
-            <article><span>03</span><h3>Encode</h3><p>Images become HDR JPEGs; videos become 10-bit HEVC HDR10 MP4s.</p></article><i aria-hidden="true">→</i>
-            <article><span>04</span><h3>Signal</h3><p>Rec.2020 primaries and the PQ transfer curve tell HDR displays to use their headroom.</p></article>
-          </div>
-        </section>
-
-        <section className="field-notes" aria-labelledby="notes-title">
-          <div><p className="eyebrow">Field notes</p><h2 id="notes-title">The effect depends on the whole chain.</h2></div>
-          <div className="chain"><span>HDR media</span><b>+</b><span>metadata survives</span><b>+</b><span>HDR rendering</span><b>+</b><span>HDR display</span><b>=</b><strong>SuperWhite</strong></div>
-          <div className="notes-grid">
-            <article><h3>Video is actual HDR10</h3><p>The local runner produces Main 10 HEVC with BT.2020 primaries, SMPTE 2084 PQ, and HDR10 mastering metadata.</p></article>
-            <article><h3>SDR fails gracefully</h3><p>On a standard display, compatible players tone-map the result instead of emitting HDR highlight brightness.</p></article>
-            <article><h3>No geometry tricks</h3><p>A 1920 × 1080 input remains 1920 × 1080. Portrait, ultrawide, and square inputs keep their own shape.</p></article>
           </div>
         </section>
 

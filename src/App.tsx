@@ -36,26 +36,6 @@ function videoOutputName(inputName: string, stops: number) {
   return `${stem || 'video'}-superwhite-${String(stops).replace('.', '-')}stops.mp4`
 }
 
-function makeHeroTextPixels(): PixelBuffer {
-  const canvas = document.createElement('canvas')
-  canvas.width = 2000
-  canvas.height = 420
-  const context = canvas.getContext('2d', { willReadFrequently: true })
-  if (!context) throw new Error('This browser cannot create the HDR headline.')
-
-  context.fillStyle = '#080808'
-  context.fillRect(0, 0, canvas.width, canvas.height)
-  context.fillStyle = '#ffffff'
-  context.font = '900 270px Arial Black, Arial, sans-serif'
-  context.textAlign = 'center'
-  context.textBaseline = 'middle'
-  context.letterSpacing = '-13px'
-  context.fillText('SUPERWHITE', canvas.width / 2, canvas.height / 2 - 8)
-
-  const image = context.getImageData(0, 0, canvas.width, canvas.height)
-  return { data: image.data, width: image.width, height: image.height }
-}
-
 function App() {
   const [source, setSource] = useState<PixelBuffer>(() => makeDemoPixels())
   const [mediaKind, setMediaKind] = useState<MediaKind>('image')
@@ -67,7 +47,6 @@ function App() {
   const [converted, setConverted] = useState<ConvertedPixels | null>(null)
   const [outputBlob, setOutputBlob] = useState<Blob | null>(null)
   const [outputUrl, setOutputUrl] = useState('')
-  const [heroHdrUrl, setHeroHdrUrl] = useState('')
   const [conversionState, setConversionState] = useState<ConversionState>('working')
   const [message, setMessage] = useState('Preparing the HDR preview…')
   const [dragging, setDragging] = useState(false)
@@ -76,14 +55,6 @@ function App() {
   const fileInput = useRef<HTMLInputElement>(null)
 
   const imageSourceUrl = useMemo(() => pixelsToSdrUrl(source), [source])
-
-  useEffect(() => {
-    let cancelled = false
-    void encodeHdrJpeg(convertToHdr(makeHeroTextPixels(), stops)).then((blob) => {
-      if (!cancelled) setHeroHdrUrl(URL.createObjectURL(blob))
-    })
-    return () => { cancelled = true }
-  }, [stops])
 
   useEffect(() => {
     void fetch('/api/health', { cache: 'no-store' })
@@ -130,10 +101,6 @@ function App() {
   useEffect(() => () => {
     if (videoSourceUrl) URL.revokeObjectURL(videoSourceUrl)
   }, [videoSourceUrl])
-
-  useEffect(() => () => {
-    if (heroHdrUrl) URL.revokeObjectURL(heroHdrUrl)
-  }, [heroHdrUrl])
 
   async function convertVideo(file = videoFile) {
     if (!file) return
@@ -252,25 +219,29 @@ function App() {
   return (
     <>
       <header className="site-header">
-        <a className="wordmark" href="#top" aria-label="SuperWhite home"><span className="wordmark-mark">SW</span><span>SuperWhite</span></a>
+        <a className="wordmark" href="#top" aria-label="SuperWhite home"><span>SUPER</span><strong>WHITE</strong></a>
         <nav aria-label="Primary navigation">
-          <a href="#workbench">Convert</a><a href="#method">Method</a>
-          <a className="github-link" href="https://github.com/Arkane-o7/SuperWhite" target="_blank" rel="noreferrer"><GithubIcon /> GitHub</a>
+          <a className="nav-link" href="#workbench">Converter</a>
+          <a className="nav-link" href="#method">How it works</a>
+          <a className="github-link" href="https://github.com/Arkane-o7/SuperWhite" target="_blank" rel="noreferrer"><GithubIcon /><span>GitHub</span></a>
+          <a className="header-cta" href="#workbench">Try it now <ArrowIcon /></a>
         </nav>
       </header>
 
       <main id="top">
         <section className="hero" aria-labelledby="hero-title">
-          <div className="hero-copy">
-            <p className="hero-eyebrow">HDR image + video converter</p>
+          <div className="hero-inner">
+            <p className="hero-eyebrow">The open-source HDR converter</p>
             <h1 id="hero-title">
-              <span>Make your Images</span>
-              {heroHdrUrl
-                ? <img className="hero-hdr-text" src={heroHdrUrl} alt="SUPERWHITE" />
-                : <strong>SUPERWHITE</strong>}
+              <span>Make anything</span>
+              <strong className="hero-sdr-text">SUPERWHITE</strong>
             </h1>
-            <p className="hero-intro">Raise real highlight brightness without changing the frame, aspect ratio, timeline, or audio.</p>
-            <a className="text-cta" href="#workbench">Make it SuperWhite <ArrowIcon /></a>
+            <p className="hero-intro">Turn any image or video into real HDR media—without changing its size, shape, or timing.</p>
+            <div className="hero-actions">
+              <a className="hero-primary" href="#workbench">Make it SuperWhite <ArrowIcon /></a>
+              <a className="hero-secondary" href="https://github.com/Arkane-o7/SuperWhite" target="_blank" rel="noreferrer"><GithubIcon /> View on GitHub</a>
+            </div>
+            <p className="hero-trust"><span>Private by default</span><i />Runs on your device</p>
           </div>
         </section>
 

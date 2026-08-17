@@ -352,22 +352,6 @@ input:focus-visible {
   height: 16px;
 }
 
-.hero-trust {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 24px 0 0;
-  color: #676761;
-  font-size: 12px;
-}
-
-.hero-trust i {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #555550;
-}
-
 .hdr-image {
   dynamic-range-limit: no-limit;
 }
@@ -1226,10 +1210,6 @@ footer p a {
   .hero-primary,
   .hero-secondary {
     width: 100%;
-  }
-
-  .hero-trust {
-    font-size: 11px;
   }
 
   .preview-toolbar {

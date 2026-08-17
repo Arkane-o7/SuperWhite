@@ -241,7 +241,6 @@ function App() {
               <a className="hero-primary" href="#workbench">Make it SuperWhite <ArrowIcon /></a>
               <a className="hero-secondary" href="https://github.com/Arkane-o7/SuperWhite" target="_blank" rel="noreferrer"><GithubIcon /> View on GitHub</a>
             </div>
-            <p className="hero-trust"><span>Private by default</span><i />Runs on your device</p>
           </div>
         </section>
 

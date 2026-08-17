@@ -248,11 +248,9 @@ function App() {
           <div className="section-heading">
             <p className="eyebrow">The workbench</p>
             <h2 id="workbench-title">Any shape.<br />Still or moving.</h2>
-            <p>Original geometry · original timing · no cropping</p>
           </div>
           <div className="workbench">
             <div className="preview-bay">
-              <div className="preview-toolbar"><span>Live comparison</span><span className="local-badge"><i /> Stays on this machine</span></div>
               <div className="preview-pair">
                 <figure>
                   {mediaKind === 'video' ? <video src={videoSourceUrl} controls playsInline /> : <img src={imageSourceUrl} alt="Original SDR input" />}

@@ -27,6 +27,13 @@ const DownloadIcon = () => (
   <svg aria-hidden="true" viewBox="0 0 20 20" width="18" height="18"><path d="M10 2v10m0 0 4-4m-4 4L6 8M3 15.5h14" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>
 )
 
+const SuperWhiteIcon = () => (
+  <svg className="superwhite-icon" aria-hidden="true" viewBox="0 0 64 64">
+    <rect x="0.5" y="0.5" width="63" height="63" rx="14.5" fill="#11110f" stroke="#41413c" />
+    <path fill="#fff" d="M9 18h9l4 18 5-18h10l5 18 4-18h9L47 48H37l-5-17-5 17H17L9 18Z" />
+  </svg>
+)
+
 function isVideo(file: File) {
   return file.type.startsWith('video/') || /\.(mp4|mov|mkv|webm|avi|m4v|mts|m2ts|wmv)$/i.test(file.name)
 }
@@ -302,12 +309,25 @@ function App() {
         </section>
 
         <section className="terminal-section" aria-labelledby="terminal-title">
-          <div><p className="eyebrow">Prefer a terminal?</p><h2 id="terminal-title">The CLI handles full media files.</h2></div>
+          <div><p className="eyebrow">Prefer a terminal?</p><h2 id="terminal-title">Try out SuperWhite CLI.</h2></div>
           <button className="command" type="button" onClick={() => void copyCommand()}><code><span>$</span> {terminalCommand}</code><small>{copied ? 'Copied' : 'Copy'}</small></button>
         </section>
       </main>
 
-      <footer><a className="wordmark footer-mark" href="#top"><span className="wordmark-mark">SW</span><span>SuperWhite</span></a><p>Open source. Built for controlled overexposure.</p><p>Original geometry in. HDR light out.</p></footer>
+      <footer className="site-footer">
+        <div className="footer-main">
+          <a className="footer-brand" href="#top" aria-label="SuperWhite home">
+            <SuperWhiteIcon />
+            <span className="footer-brand-copy">
+              <span className="footer-wordmark"><span>SUPER</span><strong>WHITE</strong></span>
+              <small>HDR media, made locally.</small>
+            </span>
+          </a>
+          <p className="footer-open-source"><strong>Open source by design.</strong><span>MIT-licensed. Inspect it, fork it, make it yours.</span></p>
+          <a className="footer-github" href="https://github.com/Arkane-o7/SuperWhite" target="_blank" rel="noreferrer"><GithubIcon /><span>View on GitHub</span><ArrowIcon /></a>
+        </div>
+        <div className="footer-bottom"><span>© 2026 Arkane-o7</span><a href="https://github.com/Arkane-o7/SuperWhite/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License</a><span>Built for controlled overexposure.</span></div>
+      </footer>
     </>
   )
 }

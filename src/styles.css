@@ -35,7 +35,33 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-color: #5b5b55 #080808;
+  scrollbar-width: thin;
   overscroll-behavior-y: none;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080808;
+}
+
+::-webkit-scrollbar-thumb {
+  min-height: 48px;
+  border: 3px solid #080808;
+  border-radius: 999px;
+  background: #5b5b55;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #85857e;
+}
+
+::-webkit-scrollbar-corner {
+  background: #080808;
 }
 
 body {
@@ -784,55 +810,118 @@ input:focus-visible {
   text-transform: uppercase;
 }
 
-footer {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 30px;
-  align-items: center;
-  padding: 38px var(--content-edge);
+.site-footer {
+  padding: 0 var(--content-edge);
   border-top: 1px solid var(--panel-rule);
-  background: var(--panel);
-  color: #777770;
-  font-size: 10px;
+  background: #0b0b0a;
+  color: #96968f;
 }
 
-.footer-mark {
-  gap: 10px;
-  color: #dddcd5;
-  font-family: var(--body);
-  font-size: 14px;
-  font-weight: 750;
-  letter-spacing: -0.02em;
-}
-
-.footer-mark > span {
-  color: inherit;
-}
-
-.footer-mark .wordmark-mark {
+.footer-main {
   display: grid;
-  width: 30px;
-  height: 30px;
-  place-items: center;
-  border-radius: var(--radius-xs);
-  background: #dddcd5;
-  color: #11110f;
+  grid-template-columns: minmax(250px, 1fr) minmax(270px, 0.8fr) auto;
+  gap: clamp(36px, 6vw, 100px);
+  align-items: center;
+  padding: 58px 0 52px;
+}
+
+.footer-brand {
+  display: inline-flex;
+  gap: 14px;
+  align-items: center;
+  width: fit-content;
+  text-decoration: none;
+}
+
+.superwhite-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.footer-brand-copy {
+  display: grid;
+  gap: 5px;
+}
+
+.footer-wordmark {
   font-family: var(--display);
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: -0.065em;
+  line-height: 1;
+}
+
+.footer-wordmark > span {
+  color: #777770;
+}
+
+.footer-wordmark strong {
+  color: #f1f1eb;
+}
+
+.footer-brand-copy small {
+  color: #71716b;
   font-size: 10px;
-  letter-spacing: -0.08em;
 }
 
-footer p {
+.footer-open-source {
+  display: grid;
+  gap: 7px;
   margin: 0;
-  text-align: center;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
-footer p:last-child {
-  text-align: right;
+.footer-open-source strong {
+  color: #e2e2dc;
+  font-size: 14px;
 }
 
-footer p a {
-  color: #b6b6af;
+.footer-open-source span {
+  color: #7d7d76;
+}
+
+.footer-github {
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 18px;
+  border: 1px solid #3c3c37;
+  border-radius: 999px;
+  color: #e5e5df;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.footer-github:hover {
+  border-color: #6c6c65;
+  background: #151514;
+}
+
+.footer-github > svg:last-child {
+  width: 14px;
+  margin-left: 4px;
+}
+
+.footer-bottom {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 19px 0 24px;
+  border-top: 1px solid #2b2b28;
+  color: #63635d;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.02em;
+}
+
+.footer-bottom a {
+  color: #9b9b94;
+  text-underline-offset: 3px;
 }
 
 .visually-hidden {
@@ -948,14 +1037,24 @@ footer p a {
     grid-column: 2;
   }
 
-  footer {
-    grid-template-columns: 1fr;
-    padding: 38px 20px;
+  .site-footer {
+    padding-right: 20px;
+    padding-left: 20px;
   }
 
-  footer p,
-  footer p:last-child {
-    text-align: left;
+  .footer-main {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 46px 0 38px;
+  }
+
+  .footer-github {
+    width: fit-content;
+  }
+
+  .footer-bottom {
+    flex-wrap: wrap;
+    justify-content: flex-start;
   }
 }
 

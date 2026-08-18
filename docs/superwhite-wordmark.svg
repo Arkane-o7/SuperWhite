@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" role="img" aria-labelledby="title desc">
+  <title id="title">SuperWhite</title>
+  <desc id="desc">The SuperWhite wordmark on a black halftone field.</desc>
+  <defs>
+    <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="1.5" fill="#b9b9b2" opacity=".22"/>
+    </pattern>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#080808" stop-opacity="1"/>
+      <stop offset=".38" stop-color="#080808" stop-opacity=".88"/>
+      <stop offset="1" stop-color="#080808" stop-opacity=".2"/>
+    </linearGradient>
+    <mask id="dot-fade">
+      <rect width="1200" height="240" fill="url(#fade)"/>
+    </mask>
+  </defs>
+  <rect width="1200" height="240" rx="26" fill="#080808"/>
+  <rect y="68" width="1200" height="172" fill="url(#dots)" mask="url(#dot-fade)"/>
+  <text x="600" y="149" text-anchor="middle" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="104" font-weight="900" letter-spacing="-7">
+    <tspan fill="#84847f">SUPER</tspan><tspan fill="#f1f1ec">WHITE</tspan>
+  </text>
+</svg>

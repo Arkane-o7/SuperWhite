@@ -1,43 +1,55 @@
 <p align="center">
-  <img src="public/favicon.svg" width="72" height="72" alt="SuperWhite mark">
-</p>
-
-<h1 align="center">SuperWhite</h1>
-
-<p align="center">
-  <strong>Any shape. Still or moving.</strong><br>
-  Convert SDR images and videos into dimension-preserving Rec.2020/PQ HDR media.
+  <img src="docs/superwhite-wordmark.svg" width="760" alt="SuperWhite">
 </p>
 
 <p align="center">
-  <a href="https://arkane-o7.github.io/SuperWhite/">Open the website</a>
+  <strong>Turn SDR images and videos into real Rec.2020/PQ HDR media.</strong><br>
+  Keep the original size, shape, frame rate, duration, and timing.
 </p>
 
-![SuperWhite media converter](docs/superwhite-preview.png)
+<p align="center">
+  <a href="https://arkane-o7.github.io/SuperWhite/"><strong>Open SuperWhite</strong></a>
+  &nbsp;·&nbsp;
+  <a href="#command-line">Command line</a>
+  &nbsp;·&nbsp;
+  <a href="#open-source">Open source</a>
+</p>
 
-SuperWhite adds real HDR highlight brightness to media without changing its
-shape. A 1920 × 1080 video remains 1920 × 1080. Portrait footage remains
-portrait. Frame rate, duration, and audio timing are preserved.
+![SuperWhite hero](docs/superwhite-hero.png)
 
-The brightest pixels can then render above SDR reference white on a compatible
-HDR display. On SDR displays, compatible software tone-maps the result.
+SuperWhite selectively lifts bright SDR pixels into HDR headroom. It does not
+fake the effect by resizing, cropping, padding, or stretching the source.
 
-## What it accepts
+| Use it in | Best for | Processing |
+|---|---|---|
+| **Public website** | Images | Entirely inside the browser |
+| **Local website** | Images and videos | Browser + FFmpeg on your machine |
+| **Command line** | Repeatable image and video conversion | Python + FFmpeg on your machine |
 
-- Images in any format the browser or Pillow can decode
-- Videos in any format FFmpeg can decode, including MP4, MOV, MKV, WebM, AVI,
-  MTS, and M2TS
-- Landscape, portrait, ultrawide, square, or any other source aspect ratio
+## What ships today
 
-There is no square requirement, no crop step, and no padding step.
+- A browser image converter with a live SDR/HDR comparison and exposure control
+- Dimension-preserving HDR JPEG output with a bundled Rec.2020/PQ ICC profile
+- A local video workbench backed by native FFmpeg
+- HDR10 MP4 output using 10-bit HEVC, Rec.2020 primaries, PQ, and HDR10 metadata
+- Image and video CLI tools for repeatable conversions
+- Automatic macOS, Windows, and Linux setup instructions on the website
+
+![SuperWhite workbench](docs/superwhite-preview.png)
 
 ## Use the website
 
-Image conversion works directly on the public static website and never sends
-the image to a server.
+Open **[arkane-o7.github.io/SuperWhite](https://arkane-o7.github.io/SuperWhite/)**
+and drop in an image. Choose an exposure from +1.0 to +3.9 stops, inspect the
+result, and download the HDR JPEG.
 
-Video conversion uses native FFmpeg. Run the same interface locally to enable
-video uploads:
+Image conversion on the public website happens in the browser. The file is not
+uploaded to a remote conversion service.
+
+### Enable video in the same interface
+
+The public GitHub Pages build cannot run native FFmpeg. Clone the project and
+start the local runner to enable video conversion:
 
 ```bash
 git clone https://github.com/Arkane-o7/SuperWhite.git
@@ -48,34 +60,76 @@ brew install ffmpeg
 npm run local
 ```
 
-Then open [http://127.0.0.1:4173](http://127.0.0.1:4173), drop in a video, set
-the exposure, and download the HDR10 MP4. The upload travels only from your
-browser to the FFmpeg process on the same machine.
+Open [http://127.0.0.1:4173](http://127.0.0.1:4173). Uploaded videos travel
+only from the browser to the FFmpeg process running on the same machine.
 
-The public GitHub Pages build cannot execute native FFmpeg, so it shows the
-local-runner instruction when a video is selected instead of pretending it can
-produce a standards-correct HDR video in-browser.
+> The example above is for macOS. Use the platform-specific FFmpeg command in
+> the next section on Windows or Linux. On Windows, replace `npm run local`
+> with `npm run build` followed by `py scripts\superwhite_server.py`.
 
 ## Command line
 
-### Image
+SuperWhite is currently installed from source. It is not published as a
+`pip install superwhite` package or a Homebrew formula.
+
+<details open>
+<summary><strong>macOS</strong></summary>
+
+```bash
+git clone https://github.com/Arkane-o7/SuperWhite.git
+cd SuperWhite
+python3 -m pip install -r requirements.txt
+brew install ffmpeg
+```
+
+</details>
+
+<details>
+<summary><strong>Windows · PowerShell</strong></summary>
+
+```powershell
+git clone https://github.com/Arkane-o7/SuperWhite.git
+Set-Location SuperWhite
+py -m pip install -r requirements.txt
+winget install --id Gyan.FFmpeg --exact
+```
+
+</details>
+
+<details>
+<summary><strong>Linux · Debian / Ubuntu</strong></summary>
+
+```bash
+sudo apt update
+sudo apt install ffmpeg
+git clone https://github.com/Arkane-o7/SuperWhite.git
+cd SuperWhite
+python3 -m pip install -r requirements.txt
+```
+
+Use your distribution's package manager instead of `apt` on other Linux
+distributions.
+
+</details>
+
+### Convert an image
 
 ```bash
 python3 scripts/make_hdr_image.py input.png output-hdr.jpg --stops 2.5
 python3 scripts/inspect_hdr_image.py output-hdr.jpg
 ```
 
-The image converter preserves the exact aspect ratio and dimensions, flattens
-transparency, converts linear light into Rec.2020,
-PQ-encodes the result, and embeds the bundled Rec.2020/PQ ICC profile.
+The image converter accepts formats Pillow can decode, preserves the source
+dimensions and aspect ratio, flattens transparency onto near-black, converts
+the image to Rec.2020, PQ-encodes it, and embeds the bundled delivery profile.
 
-### Video
+### Convert a video
 
 ```bash
 python3 scripts/make_hdr_video.py input.mp4 output-hdr.mp4 --stops 2.5
 ```
 
-Useful controls:
+Optional x265 controls:
 
 ```bash
 python3 scripts/make_hdr_video.py input.mov output-hdr.mp4 \
@@ -84,45 +138,39 @@ python3 scripts/make_hdr_video.py input.mov output-hdr.mp4 \
   --preset medium
 ```
 
-The output is:
+The video output keeps the source resolution, display aspect ratio, frame
+rate, duration, and audio timing. It uses 10-bit HEVC Main 10 in an MP4
+container with the `hvc1` compatibility tag and AAC audio.
 
-- The same width, height, display aspect ratio, frame rate, and duration
-- 10-bit HEVC Main 10 in an MP4 container with the `hvc1` compatibility tag
-- Rec.2020 primaries with SMPTE ST 2084 (PQ)
-- HDR10 mastering-display and MaxCLL/MaxFALL metadata
-- Original audio timing, encoded as AAC for broad MP4 compatibility
-
-Already-HDR PQ or HLG input is rejected to avoid double conversion.
+Already-HDR PQ and HLG video inputs are rejected to prevent double conversion.
+On Windows, replace `python3` with `py` in the commands above.
 
 ## Exposure
 
-`--stops` controls the maximum highlight lift. It does not resize the media.
+`--stops` controls the maximum highlight lift. It never changes the media's
+geometry.
 
 | Stops | Approximate target | Character |
 |---:|---:|---|
-| +1.0 | 406 nit | restrained |
-| +2.0 | 812 nit | visible |
-| +2.5 | 1,148 nit | strong |
-| +3.0 | 1,624 nit | intense |
-| +3.9 | 3,027 nit | extreme |
+| +1.0 | 406 nit | Restrained |
+| +2.0 | 812 nit | Visible |
+| +2.5 | 1,148 nit | Strong |
+| +3.0 | 1,624 nit | Intense |
+| +3.9 | 3,027 nit | Extreme |
 
-The lift uses a smooth luminance threshold, so dark and midtone areas remain
-close to their source behavior while highlights receive the HDR headroom.
+The lift uses a smooth luminance threshold, leaving dark and midtone areas
+close to the source while giving highlights access to HDR headroom.
 
-## How it works
+## Compatibility
 
-```text
-SDR image                         SDR video + audio
-    │                                     │
-    ├─ preserve source geometry           ├─ preserve geometry and timing
-    ├─ linearize sRGB                     ├─ normalize SDR color to BT.709
-    ├─ convert to Rec.2020                 ├─ apply the SuperWhite 3D LUT
-    ├─ selectively lift highlights        ├─ encode 10-bit Rec.2020/PQ HEVC
-    ├─ PQ encode                          ├─ write HDR10 metadata
-    └─ embed PQ ICC profile               └─ retain audio timing in MP4
-```
+The visible result depends on the complete playback chain: the HDR file,
+metadata surviving its destination, an HDR-aware player and operating system,
+and an HDR-capable display. Some social platforms and image processors strip
+or rewrite HDR metadata.
 
 ## Development
+
+Requires Node.js 22.12+ and Python 3.
 
 ```bash
 npm install
@@ -132,31 +180,28 @@ python3 -m unittest discover -s tests
 npm run build
 ```
 
-`npm run dev` starts the image-only Vite development server. `npm run local`
-builds the site and starts the local FFmpeg-enabled server.
+- `npm run dev` starts the image-only Vite development server.
+- `npm run local` builds the site and starts the FFmpeg-enabled local runner.
 
-## Project layout
+<details>
+<summary><strong>Project layout</strong></summary>
 
 ```text
 src/                          React interface and browser image converter
 scripts/make_hdr_image.py     dimension-preserving HDR still converter
 scripts/make_hdr_video.py     dimension-preserving HDR10 video converter
-scripts/superwhite_server.py  local upload UI + FFmpeg bridge
+scripts/superwhite_server.py  local upload UI and FFmpeg bridge
 public/rec2020pq.icc          bundled Rec.2020/PQ delivery profile
 tests/                        image and video conversion checks
 ```
 
-## Compatibility
+</details>
 
-The visible effect needs the entire chain: HDR file, metadata that survives the
-destination, HDR-aware player/browser/OS, and an HDR-capable display. Platform
-image and video processing can strip or rewrite HDR metadata, and behavior can
-change without notice.
+## Open source
+
+SuperWhite is released under the [MIT License](LICENSE). Inspect it, fork it,
+adapt it, or contribute improvements.
 
 The still-image method and profile are adapted from
 [Adamodigi/linkedin-hdr-logo](https://github.com/Adamodigi/linkedin-hdr-logo)
 under the MIT License. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-## License
-
-[MIT](LICENSE)

@@ -14,6 +14,58 @@ import { fileToPixels, makeDemoPixels, pixelsToSdrUrl } from './lib/image'
 
 type ConversionState = 'idle' | 'working' | 'ready' | 'error'
 type MediaKind = 'image' | 'video'
+type CliPlatform = 'macos' | 'windows' | 'linux'
+
+const CLI_PLATFORM_ORDER: CliPlatform[] = ['macos', 'windows', 'linux']
+
+const CLI_PLATFORMS: Record<CliPlatform, {
+  label: string
+  shell: string
+  commands: string[]
+  note: string
+}> = {
+  macos: {
+    label: 'macOS',
+    shell: 'Terminal',
+    commands: [
+      'git clone https://github.com/Arkane-o7/SuperWhite.git',
+      'cd SuperWhite',
+      'python3 -m pip install -r requirements.txt',
+      'brew install ffmpeg',
+    ],
+    note: 'Uses Homebrew for FFmpeg video support.',
+  },
+  windows: {
+    label: 'Windows',
+    shell: 'PowerShell',
+    commands: [
+      'git clone https://github.com/Arkane-o7/SuperWhite.git',
+      'Set-Location SuperWhite',
+      'py -m pip install -r requirements.txt',
+      'winget install --id Gyan.FFmpeg --exact',
+    ],
+    note: 'Run in PowerShell. WinGet installs FFmpeg for video support.',
+  },
+  linux: {
+    label: 'Linux',
+    shell: 'Terminal',
+    commands: [
+      'git clone https://github.com/Arkane-o7/SuperWhite.git',
+      'cd SuperWhite',
+      'python3 -m pip install -r requirements.txt',
+      'sudo apt install ffmpeg',
+    ],
+    note: 'FFmpeg command is for Debian and Ubuntu; use your distro package manager elsewhere.',
+  },
+}
+
+function detectCliPlatform(): CliPlatform {
+  if (typeof navigator === 'undefined') return 'macos'
+  const client = `${navigator.platform} ${navigator.userAgent}`
+  if (/windows|win32|win64/i.test(client)) return 'windows'
+  if (/macintosh|macintel|mac os|iphone|ipad/i.test(client)) return 'macos'
+  return 'linux'
+}
 
 const GithubIcon = () => (
   <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 .7a11.5 11.5 0 0 0-3.64 22.41c.58.11.79-.25.79-.56v-2.23c-3.24.7-3.92-1.37-3.92-1.37-.53-1.35-1.3-1.71-1.3-1.71-1.06-.73.08-.71.08-.71 1.17.08 1.79 1.2 1.79 1.2 1.04 1.79 2.73 1.27 3.4.97.1-.76.41-1.27.74-1.56-2.59-.3-5.31-1.3-5.31-5.68 0-1.26.45-2.29 1.2-3.1-.12-.3-.52-1.48.11-3.07 0 0 .98-.31 3.16 1.18a10.95 10.95 0 0 1 5.75 0c2.18-1.49 3.16-1.18 3.16-1.18.63 1.59.23 2.77.11 3.07.75.81 1.2 1.84 1.2 3.1 0 4.39-2.73 5.38-5.33 5.67.42.36.79 1.08.79 2.18v3.24c0 .31.21.68.8.56A11.5 11.5 0 0 0 12 .7Z" /></svg>
@@ -36,13 +88,6 @@ function videoOutputName(inputName: string, stops: number) {
   return `${stem || 'video'}-superwhite-${String(stops).replace('.', '-')}stops.mp4`
 }
 
-function cliCommand(mediaKind: MediaKind, stops: number) {
-  const exposure = stops.toFixed(1)
-  return mediaKind === 'video'
-    ? `python3 scripts/make_hdr_video.py input.mp4 output-hdr.mp4 --stops ${exposure}`
-    : `python3 scripts/make_hdr_image.py input.png output-hdr.jpg --stops ${exposure}`
-}
-
 function App() {
   const [source, setSource] = useState<PixelBuffer>(() => makeDemoPixels())
   const [mediaKind, setMediaKind] = useState<MediaKind>('image')
@@ -58,6 +103,7 @@ function App() {
   const [message, setMessage] = useState('Preparing the HDR preview…')
   const [dragging, setDragging] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [cliPlatform, setCliPlatform] = useState<CliPlatform>(() => detectCliPlatform())
   const [localVideoAvailable, setLocalVideoAvailable] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
 
@@ -199,9 +245,27 @@ function App() {
   }
 
   async function copyCommand() {
-    await navigator.clipboard.writeText(cliCommand(mediaKind, stops))
+    const commands = CLI_PLATFORMS[cliPlatform].commands.join('\n')
+    try {
+      await navigator.clipboard.writeText(commands)
+    } catch {
+      const fallback = document.createElement('textarea')
+      fallback.value = commands
+      fallback.setAttribute('readonly', '')
+      fallback.style.position = 'fixed'
+      fallback.style.opacity = '0'
+      document.body.appendChild(fallback)
+      fallback.select()
+      document.execCommand('copy')
+      fallback.remove()
+    }
     setCopied(true)
     window.setTimeout(() => setCopied(false), 1800)
+  }
+
+  function selectCliPlatform(platform: CliPlatform) {
+    setCliPlatform(platform)
+    setCopied(false)
   }
 
   function updateStops(value: number) {
@@ -216,8 +280,7 @@ function App() {
   const boostCoverage = converted && mediaKind === 'image'
     ? `${((converted.boostedPixels / (source.width * source.height)) * 100).toFixed(1)}%`
     : 'per frame'
-  const terminalCommand = cliCommand(mediaKind, stops)
-
+  const cliSetup = CLI_PLATFORMS[cliPlatform]
   return (
     <>
       <header className="site-header">
@@ -304,8 +367,28 @@ function App() {
         </section>
 
         <section className="terminal-section" aria-labelledby="terminal-title">
-          <div><p className="eyebrow">Prefer a terminal?</p><h2 id="terminal-title">Try out SuperWhite CLI.</h2></div>
-          <button className="command" type="button" onClick={() => void copyCommand()}><code><span>$</span> {terminalCommand}</code><small>{copied ? 'Copied' : 'Copy'}</small></button>
+          <div><p className="eyebrow">Install from source</p><h2 id="terminal-title">Try out SuperWhite CLI.</h2></div>
+          <div className="cli-command-group">
+            <div className="cli-platforms" role="group" aria-label="Choose your operating system">
+              {CLI_PLATFORM_ORDER.map((platform) => (
+                <button
+                  className={cliPlatform === platform ? 'is-active' : ''}
+                  type="button"
+                  key={platform}
+                  aria-pressed={cliPlatform === platform}
+                  onClick={() => selectCliPlatform(platform)}
+                >
+                  {CLI_PLATFORMS[platform].label}
+                </button>
+              ))}
+            </div>
+            <div className="cli-shell-label"><span>Setup</span><span>{cliSetup.shell}</span></div>
+            <button className="command" type="button" onClick={() => void copyCommand()} aria-label={`Copy ${cliSetup.label} setup commands`}>
+              <code>{cliSetup.commands.map((command) => <span className="cli-line" key={command}><i aria-hidden="true">$</i>{command}</span>)}</code>
+              <small>{copied ? 'Copied' : 'Copy all'}</small>
+            </button>
+            <p className="cli-requirement">{cliSetup.note}</p>
+          </div>
         </section>
       </main>
 

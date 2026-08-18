@@ -111,10 +111,15 @@ def convert(input_path: Path, output_path: Path, stops: float) -> dict[str, obje
     with Image.open(input_path) as image:
         source_matrix, source_name = source_gamut(image)
         normalized, original_size = normalize_image(image)
-        encoded = np.asarray(normalized).astype(np.float64) / 255.0
+        encoded = np.asarray(normalized, dtype=np.float64) / 255.0
 
     linear = srgb_eotf(encoded)
-    rec2020 = np.clip(linear @ (XYZ_TO_2020 @ source_matrix).T, 0, None)
+    conversion_matrix = XYZ_TO_2020 @ source_matrix
+    rec2020 = np.clip(
+        np.einsum("...j,ij->...i", linear, conversion_matrix, optimize=True),
+        0,
+        None,
+    )
     luminance = (
         0.2627 * rec2020[..., 0]
         + 0.6780 * rec2020[..., 1]

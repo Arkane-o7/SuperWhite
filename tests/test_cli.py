@@ -36,6 +36,7 @@ class CliTests(unittest.TestCase):
                 text=True,
             )
             self.assertEqual(conversion.returncode, 0, conversion.stderr)
+            self.assertNotIn("RuntimeWarning", conversion.stderr)
 
             with Image.open(output) as result:
                 self.assertEqual(result.size, (64, 64))
@@ -71,6 +72,7 @@ class CliTests(unittest.TestCase):
                 text=True,
             )
             self.assertEqual(conversion.returncode, 0, conversion.stderr)
+            self.assertNotIn("RuntimeWarning", conversion.stderr)
             self.assertIn("fit: 192x108 -> 192x108", conversion.stdout)
             with Image.open(output) as result:
                 self.assertEqual(result.size, (192, 108))

@@ -61,8 +61,8 @@ produce a standards-correct HDR video in-browser.
 ### Image
 
 ```bash
-python scripts/make_hdr_image.py input.png output-hdr.jpg --stops 2.5
-python scripts/inspect_hdr_image.py output-hdr.jpg
+python3 scripts/make_hdr_image.py input.png output-hdr.jpg --stops 2.5
+python3 scripts/inspect_hdr_image.py output-hdr.jpg
 ```
 
 The image converter preserves the exact aspect ratio and dimensions, flattens
@@ -72,13 +72,13 @@ PQ-encodes the result, and embeds the bundled Rec.2020/PQ ICC profile.
 ### Video
 
 ```bash
-python scripts/make_hdr_video.py input.mp4 output-hdr.mp4 --stops 2.5
+python3 scripts/make_hdr_video.py input.mp4 output-hdr.mp4 --stops 2.5
 ```
 
 Useful controls:
 
 ```bash
-python scripts/make_hdr_video.py input.mov output-hdr.mp4 \
+python3 scripts/make_hdr_video.py input.mov output-hdr.mp4 \
   --stops 3.0 \
   --crf 18 \
   --preset medium

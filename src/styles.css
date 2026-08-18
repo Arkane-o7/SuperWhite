@@ -827,20 +827,9 @@ input:focus-visible {
 
 .footer-brand {
   display: inline-flex;
-  gap: 14px;
   align-items: center;
   width: fit-content;
   text-decoration: none;
-}
-
-.superwhite-icon {
-  width: 48px;
-  height: 48px;
-}
-
-.footer-brand-copy {
-  display: grid;
-  gap: 5px;
 }
 
 .footer-wordmark {
@@ -857,11 +846,6 @@ input:focus-visible {
 
 .footer-wordmark strong {
   color: #f1f1eb;
-}
-
-.footer-brand-copy small {
-  color: #71716b;
-  font-size: 10px;
 }
 
 .footer-open-source {

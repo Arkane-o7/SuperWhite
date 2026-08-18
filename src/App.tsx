@@ -27,13 +27,6 @@ const DownloadIcon = () => (
   <svg aria-hidden="true" viewBox="0 0 20 20" width="18" height="18"><path d="M10 2v10m0 0 4-4m-4 4L6 8M3 15.5h14" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg>
 )
 
-const SuperWhiteIcon = () => (
-  <svg className="superwhite-icon" aria-hidden="true" viewBox="0 0 64 64">
-    <rect x="0.5" y="0.5" width="63" height="63" rx="14.5" fill="#11110f" stroke="#41413c" />
-    <path fill="#fff" d="M9 18h9l4 18 5-18h10l5 18 4-18h9L47 48H37l-5-17-5 17H17L9 18Z" />
-  </svg>
-)
-
 function isVideo(file: File) {
   return file.type.startsWith('video/') || /\.(mp4|mov|mkv|webm|avi|m4v|mts|m2ts|wmv)$/i.test(file.name)
 }
@@ -41,6 +34,13 @@ function isVideo(file: File) {
 function videoOutputName(inputName: string, stops: number) {
   const stem = inputName.replace(/\.[^/.]+$/, '').replace(/[^a-z0-9-_]+/gi, '-').replace(/^-|-$/g, '')
   return `${stem || 'video'}-superwhite-${String(stops).replace('.', '-')}stops.mp4`
+}
+
+function cliCommand(mediaKind: MediaKind, stops: number) {
+  const exposure = stops.toFixed(1)
+  return mediaKind === 'video'
+    ? `python3 scripts/make_hdr_video.py input.mp4 output-hdr.mp4 --stops ${exposure}`
+    : `python3 scripts/make_hdr_image.py input.png output-hdr.jpg --stops ${exposure}`
 }
 
 function App() {
@@ -199,10 +199,7 @@ function App() {
   }
 
   async function copyCommand() {
-    const command = mediaKind === 'video'
-      ? `python scripts/make_hdr_video.py input.mp4 output-hdr.mp4 --stops ${stops}`
-      : `python scripts/make_hdr_image.py input.png output-hdr.jpg --stops ${stops}`
-    await navigator.clipboard.writeText(command)
+    await navigator.clipboard.writeText(cliCommand(mediaKind, stops))
     setCopied(true)
     window.setTimeout(() => setCopied(false), 1800)
   }
@@ -219,9 +216,7 @@ function App() {
   const boostCoverage = converted && mediaKind === 'image'
     ? `${((converted.boostedPixels / (source.width * source.height)) * 100).toFixed(1)}%`
     : 'per frame'
-  const terminalCommand = mediaKind === 'video'
-    ? `python scripts/make_hdr_video.py input.mp4 output-hdr.mp4 --stops ${stops}`
-    : `python scripts/make_hdr_image.py input.png output-hdr.jpg --stops ${stops}`
+  const terminalCommand = cliCommand(mediaKind, stops)
 
   return (
     <>
@@ -317,11 +312,7 @@ function App() {
       <footer className="site-footer">
         <div className="footer-main">
           <a className="footer-brand" href="#top" aria-label="SuperWhite home">
-            <SuperWhiteIcon />
-            <span className="footer-brand-copy">
-              <span className="footer-wordmark"><span>SUPER</span><strong>WHITE</strong></span>
-              <small>HDR media, made locally.</small>
-            </span>
+            <span className="footer-wordmark"><span>SUPER</span><strong>WHITE</strong></span>
           </a>
           <p className="footer-open-source"><strong>Open source by design.</strong><span>MIT-licensed. Inspect it, fork it, make it yours.</span></p>
           <a className="footer-github" href="https://github.com/Arkane-o7/SuperWhite" target="_blank" rel="noreferrer"><GithubIcon /><span>View on GitHub</span><ArrowIcon /></a>

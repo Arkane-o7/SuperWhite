@@ -39,7 +39,7 @@ fake the effect by resizing, cropping, padding, or stretching the source.
 
 ## Use the website
 
-Open **[arkane-o7.github.io/SuperWhite](https://arkane-o7.github.io/SuperWhite/)**
+Open **[SuperWhite]([https://superwhite.vercel.app/])**
 and drop in an image. Choose an exposure from +1.0 to +3.9 stops, inspect the
 result, and download the HDR JPEG.
 
